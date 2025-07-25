@@ -1,46 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
+
 import '../../data/models/workout/workout_dto.dart';
 import '../viewmodels/auth/auth_view_model.dart';
 import '../viewmodels/workout/workout_view_model.dart';
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+import '../widgets/loading_indicator.dart';
+class WorkoutsScreen extends StatefulWidget {
+  const WorkoutsScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<WorkoutsScreen> createState() => _WorkoutsScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _WorkoutsScreenState extends State<WorkoutsScreen> {
   @override
   void initState() {
     super.initState();
-    // This is the correct way to fetch data when the screen loads.
+    // Fetch data when the screen is first loaded.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Get the currently logged-in user's ID from the AuthViewModel.
       final authViewModel = context.read<AuthViewModel>();
-      final userId = authViewModel.user?.id;
-
-      // Correctly call fetchWorkouts with the userId.
-      context.read<WorkoutViewModel>().fetchWorkouts(userId);
+      context.read<WorkoutViewModel>().fetchWorkouts(authViewModel.user?.id);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch for changes in the WorkoutViewModel.
     final viewModel = context.watch<WorkoutViewModel>();
 
-    // Use a DefaultTabController to manage the state of the tabs.
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        // We use a nested AppBar here to hold the TabBar.
-        // The main AppBar title is provided by MainShellScreen.
+        // We use a nested AppBar for the TabBar
         appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: 0, // Effectively hides the AppBar's own height
+          toolbarHeight: 0, // Hide the default AppBar
           bottom: TabBar(
             tabs: const [
               Tab(text: 'Predefined'),
@@ -51,13 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
             indicatorColor: Theme.of(context).colorScheme.primary,
           ),
         ),
-        // The body of the scaffold shows content based on the ViewModel's state.
         body: _buildBody(viewModel),
       ),
     );
   }
 
-  /// Builds the main content area based on the current state of the ViewModel.
   Widget _buildBody(WorkoutViewModel viewModel) {
     switch (viewModel.state) {
       case ViewState.loading:
@@ -65,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
       case ViewState.error:
         return Center(child: Text(viewModel.errorMessage ?? 'An error occurred.'));
       case ViewState.success:
-      // When data is successfully loaded, show the tabbed content.
         return TabBarView(
           children: [
             _WorkoutList(workouts: viewModel.predefinedWorkouts),
@@ -74,13 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       case ViewState.idle:
       default:
-      // Show nothing by default.
         return const SizedBox.shrink();
     }
   }
 }
 
-/// A reusable helper widget to display a list of workouts in a Card format.
+// A helper widget to display a list of workouts
 class _WorkoutList extends StatelessWidget {
   final List<WorkoutDTO> workouts;
   const _WorkoutList({required this.workouts});
@@ -105,7 +93,7 @@ class _WorkoutList extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             onTap: () {
-              // TODO: Navigate to workout details screen
+              // Navigate to workout details screen
             },
           ),
         );

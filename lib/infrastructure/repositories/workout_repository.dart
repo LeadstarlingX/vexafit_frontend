@@ -1,136 +1,73 @@
-import 'package:dio/dio.dart';
 import 'package:vexafit_frontend/data/irepositories/i_workout_repository.dart';
-import '../../core/constants/api_routes.dart';
-import '../../core/dio/dio_client.dart';
+import 'package:vexafit_frontend/infrastructure/services/workout_api_service.dart';
+
 import '../../data/models/api_response.dart';
 import '../../data/models/workout/workout_dto.dart';
+import '../../data/models/workout/workout_enum.dart';
 
 class WorkoutRepository implements IWorkoutRepository {
-  final DioClient _dioClient;
+  final WorkoutApiService _workoutApiService;
 
-  WorkoutRepository({required DioClient dioClient}) : _dioClient = dioClient;
+  WorkoutRepository({required WorkoutApiService workoutApiService})
+      : _workoutApiService = workoutApiService;
 
-  // Get all workouts
   @override
-  Future<List<WorkoutDTO>> getAllWorkouts() async {
+  Future<List<WorkoutDTO>> getAllWorkouts({
+    String? name,
+    String? description,
+    WorkoutType? discriminator,
+    String? userId,
+  }) async {
     try {
-      final response = await _dioClient.dio.get(ApiRoutes.workoutGetAll);
+      final response = await _workoutApiService.getWorkouts(
+        name: name,
+        description: description,
+        discriminator: discriminator,
+        userId: userId,
+      );
 
+      // The actual list of workouts is nested inside the 'data' key.
       final apiResponse = ApiResponse<List<WorkoutDTO>>.fromJson(
         response.data,
-            (data) {
-          return (data as List).map((e) {
-            print('🧪 Parsing workout item: $e');
-            return WorkoutDTO.fromJson(e);
-          }).toList();
-        },
+            (data) => (data as List<dynamic>)
+            .map((item) => WorkoutDTO.fromJson(item as Map<String, dynamic>))
+            .toList(),
       );
 
+      // 3. Check if the API call was successful and return the data.
       if (apiResponse.isSuccess && apiResponse.data != null) {
         return apiResponse.data!;
       } else {
+        // If the API call failed, throw an exception with the server's message.
         throw Exception(apiResponse.message ?? 'Failed to fetch workouts');
       }
-    } on DioException catch (e) {
-      throw Exception('Network error: ${e.toString()}');
-    }
-    catch (e, stack){
-      print("----------------------------------");
-      print("Workout Repository");
-      print('❌ Exception caught: $e');
-      print('🔍 Stack trace:\n$stack');
-      print("----------------------------------");
-      throw Exception(e);
+    } catch (e) {
+      // Propagate the error to be handled by the ViewModel.
+      rethrow;
     }
   }
 
-  // Get workout by ID
   @override
-  Future<WorkoutDTO?> getWorkoutById(int id) async {
-    try {
-      final response = await _dioClient.dio.get(ApiRoutes.workoutGetById(id));
-
-      final apiResponse = ApiResponse<WorkoutDTO>.fromJson(
-        response.data,
-            (data) => WorkoutDTO.fromJson(data),
-      );
-
-      if (apiResponse.isSuccess && apiResponse.data != null) {
-        return apiResponse.data!;
-      } else {
-        throw Exception(apiResponse.message ?? 'Failed to fetch workout');
-      }
-    } on DioException catch (e) {
-      throw Exception('Network error: ${e.message}');
-    }
+  Future<WorkoutDTO> createWorkout(WorkoutDTO workout) {
+    // TODO: implement createWorkout
+    throw UnimplementedError();
   }
 
-  // Create a new workout
   @override
-  Future<WorkoutDTO> createWorkout(WorkoutDTO workout) async {
-    try {
-      final response = await _dioClient.dio.post(
-        ApiRoutes.workoutInsert,
-        data: workout.toJson(),
-      );
-
-      final apiResponse = ApiResponse<WorkoutDTO>.fromJson(
-        response.data,
-            (data) => WorkoutDTO.fromJson(data),
-      );
-
-      if (apiResponse.isSuccess && apiResponse.data != null) {
-        return apiResponse.data!;
-      } else {
-        throw Exception(apiResponse.message ?? 'Failed to create workout');
-      }
-    } on DioException catch (e) {
-      throw Exception('Network error: ${e.message}');
-    }
+  Future<bool> deleteWorkout(int id) {
+    // TODO: implement deleteWorkout
+    throw UnimplementedError();
   }
 
-  // Update an existing workout
   @override
-  Future<WorkoutDTO> updateWorkout(int id, WorkoutDTO workout) async {
-    try {
-      final response = await _dioClient.dio.put(
-        ApiRoutes.workoutUpdate(id),
-        data: workout.toJson(),
-      );
-
-      final apiResponse = ApiResponse<WorkoutDTO>.fromJson(
-        response.data,
-            (data) => WorkoutDTO.fromJson(data),
-      );
-
-      if (apiResponse.isSuccess && apiResponse.data != null) {
-        return apiResponse.data!;
-      } else {
-        throw Exception(apiResponse.message ?? 'Failed to update workout');
-      }
-    } on DioException catch (e) {
-      throw Exception('Network error: ${e.message}');
-    }
+  Future<WorkoutDTO?> getWorkoutById(int id) {
+    // TODO: implement getWorkoutById
+    throw UnimplementedError();
   }
 
-  // Delete workout by ID
   @override
-  Future<bool> deleteWorkout(int id) async {
-    try {
-      final response = await _dioClient.dio.delete(ApiRoutes.workoutDelete(id));
-
-      final apiResponse = ApiResponse<void>.fromJson(
-        response.data,
-        null,
-      );
-
-      if (apiResponse.isSuccess) {
-        return true;
-      } else {
-        throw Exception(apiResponse.message ?? 'Failed to delete workout');
-      }
-    } on DioException catch (e) {
-      throw Exception('Network error: ${e.message}');
-    }
+  Future<WorkoutDTO> updateWorkout(int id, WorkoutDTO workout) {
+    // TODO: implement updateWorkout
+    throw UnimplementedError();
   }
 }

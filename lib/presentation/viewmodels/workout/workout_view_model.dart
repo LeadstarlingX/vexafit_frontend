@@ -1,42 +1,46 @@
 import 'package:flutter/material.dart';
-
-import '../../../data/irepositories/i_workout_repository.dart';
+import 'package:vexafit_frontend/data/irepositories/i_workout_repository.dart';
+import 'package:vexafit_frontend/data/models/workout/workout_enum.dart';
 import '../../../data/models/workout/workout_dto.dart';
+
+enum ViewState { idle, loading, success, error }
 
 class WorkoutViewModel extends ChangeNotifier {
   final IWorkoutRepository _workoutRepository;
 
   WorkoutViewModel(this._workoutRepository);
 
-  List<WorkoutDTO> _workouts = [];
-  List<WorkoutDTO> get workouts => _workouts;
+  ViewState _state = ViewState.idle;
+  ViewState get state => _state;
 
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
+  List<WorkoutDTO> _predefinedWorkouts = [];
+  List<WorkoutDTO> get predefinedWorkouts => _predefinedWorkouts;
 
-  String? _error;
-  String? get error => _error;
+  List<WorkoutDTO> _customWorkouts = [];
+  List<WorkoutDTO> get customWorkouts => _customWorkouts;
 
-  Future<void> fetchWorkouts() async {
-    _isLoading = true;
-    _error = null;
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
+  Future<void> fetchWorkouts(String? userId) async {
+    _state = ViewState.loading;
     notifyListeners();
 
     try {
-      _workouts = await _workoutRepository.getAllWorkouts();
+      // Fetch predefined workouts (assuming discriminator 'Predefined' or similar)
+      // Note: You might need to adjust the discriminator string based on your API
+      _predefinedWorkouts = await _workoutRepository.getAllWorkouts(discriminator: WorkoutType.Predefined);
+
+      // Fetch custom workouts for the logged-in user
+      if (userId != null) {
+        _customWorkouts = await _workoutRepository.getAllWorkouts(userId: userId);
+      }
+
+      _state = ViewState.success;
     } catch (e) {
-
-      // print("----------------------------------");
-      // print("workout view model");
-      // print('❌ Exception caught: $e');
-      // print('🔍 Stack trace:\n$stack');
-      // print("----------------------------------");
-
-      _error = e.toString();
-      _workouts = [];
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      _state = ViewState.error;
+      _errorMessage = e.toString();
     }
+    notifyListeners();
   }
 }

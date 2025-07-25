@@ -1,7 +1,7 @@
 class ImageDTO {
   final int id;
   final String? alternativeText;
-  final String? imageFile; // This will be base64 or file path
+  final String? imageFile;
 
   ImageDTO({
     required this.id,
@@ -11,13 +11,15 @@ class ImageDTO {
 
   factory ImageDTO.fromJson(Map<String, dynamic> json) {
     return ImageDTO(
-      id: json['id'] ?? 0,
-      alternativeText: json['alternativeText'],
-      imageFile: json['imageFile'],
+      // Corrected to PascalCase for the response
+      id: json['Id'] ?? 0,
+      alternativeText: json['AlternativeText'],
+      imageFile: json['ImageFile'],
     );
   }
 
   Map<String, dynamic> toJson() {
+    // camelCase for requests remains the same
     return {
       'id': id,
       'alternativeText': alternativeText,
