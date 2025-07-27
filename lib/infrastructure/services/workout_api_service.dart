@@ -9,7 +9,6 @@ class WorkoutApiService {
 
   WorkoutApiService({required DioClient dioClient}) : _dioClient = dioClient;
 
-  /// Fetches the raw list of workouts from the /api/Workout/GetAll endpoint.
   Future<Response> getWorkouts({
     String? name,
     String? description,
@@ -17,29 +16,78 @@ class WorkoutApiService {
     String? userId,
   }) async {
     try {
-      // Build the query parameters, only including non-null values.
       final Map<String, dynamic> queryParameters = {};
-      if (name != null) {
-        queryParameters['Name'] = name;
-      }
-      if (description != null) {
-        queryParameters['Description'] = description;
-      }
-      if (discriminator != null) {
-        queryParameters['Discriminator'] = discriminator;
-      }
-      if (userId != null) {
-        queryParameters['UserId'] = userId;
-      }
+      if (name != null) queryParameters['Name'] = name;
+      if (description != null) queryParameters['Description'] = description;
+      // Convert the enum to its integer index before sending.
+      if (discriminator != null) queryParameters['Discriminator'] = discriminator.index;
+      if (userId != null) queryParameters['UserId'] = userId;
 
-      final response = await _dioClient.dio.get(
+      return await _dioClient.dio.get(
         ApiRoutes.workoutGetAll,
         queryParameters: queryParameters,
       );
-      return response;
     } on DioException catch (e) {
-      // Re-throw a more specific exception to be handled by the repository.
       throw Exception('Failed to fetch workouts: ${e.message}');
+    }
+  }
+
+  Future<Response> createWorkout({required String name, required String description}) async {
+    try {
+      return await _dioClient.dio.post(
+        ApiRoutes.workoutInsert,
+        queryParameters: {'Name': name, 'Description': description},
+      );
+    } on DioException catch (e) {
+      throw Exception('Failed to create workout: ${e.message}');
+    }
+  }
+
+  Future<Response> updateWorkout({required int workoutId, String? name, String? description}) async {
+    try {
+      final queryParameters = <String, dynamic>{'Id': workoutId};
+      if (name != null) queryParameters['Name'] = name;
+      if (description != null) queryParameters['Description'] = description;
+
+      return await _dioClient.dio.put(
+        ApiRoutes.workoutUpdate(workoutId),
+        queryParameters: queryParameters,
+      );
+    } on DioException catch (e) {
+      throw Exception('Failed to update workout: ${e.message}');
+    }
+  }
+
+  Future<Response> deleteWorkout(int workoutId) async {
+    try {
+      return await _dioClient.dio.delete(
+        ApiRoutes.workoutDelete(workoutId),
+        queryParameters: {'Id': workoutId},
+      );
+    } on DioException catch (e) {
+      throw Exception('Failed to delete workout: ${e.message}');
+    }
+  }
+
+  Future<Response> addExerciseToWorkout({required int workoutId, required int exerciseId}) async {
+    try {
+      return await _dioClient.dio.put(
+        ApiRoutes.workoutAddToWorkout,
+        queryParameters: {'workoutId': workoutId, 'exerciseId': exerciseId},
+      );
+    } on DioException catch (e) {
+      throw Exception('Failed to add exercise: ${e.message}');
+    }
+  }
+
+  Future<Response> removeExerciseFromWorkout({required int workoutId, required int exerciseId}) async {
+    try {
+      return await _dioClient.dio.put(
+        ApiRoutes.workoutDeleteFromWorkout,
+        queryParameters: {'workoutId': workoutId, 'exerciseId': exerciseId},
+      );
+    } on DioException catch (e) {
+      throw Exception('Failed to remove exercise: ${e.message}');
     }
   }
 }

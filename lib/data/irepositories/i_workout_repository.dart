@@ -1,4 +1,4 @@
-import '../../data/models/workout/workout_dto.dart';
+import '../models/workout/workout_dto.dart';
 import '../models/workout/workout_enum.dart';
 
 abstract class IWorkoutRepository {
@@ -9,11 +9,15 @@ abstract class IWorkoutRepository {
     String? userId,
   });
 
-  Future<WorkoutDTO?> getWorkoutById(int id);
+  // Corrected to take simple parameters, not a full object.
+  Future<void> createWorkout({required String name, required String description});
 
-  Future<WorkoutDTO> createWorkout(WorkoutDTO workout);
+  // Corrected to take simple parameters.
+  Future<void> updateWorkout({required int workoutId, String? name, String? description});
 
-  Future<WorkoutDTO> updateWorkout(int id, WorkoutDTO workout);
+  Future<void> deleteWorkout(int workoutId);
 
-  Future<bool> deleteWorkout(int id);
+  Future<void> addExerciseToWorkout({required int workoutId, required int exerciseId});
+
+  Future<void> removeExerciseFromWorkout({required int workoutId, required int exerciseId});
 }

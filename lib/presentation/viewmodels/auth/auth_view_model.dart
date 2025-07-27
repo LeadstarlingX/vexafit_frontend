@@ -3,7 +3,6 @@ import 'package:vexafit_frontend/data/models/auth/login_dto.dart';
 import 'package:vexafit_frontend/data/models/auth/user_profile_dto.dart';
 import 'package:vexafit_frontend/data/irepositories/i_auth_repository.dart';
 
-// Added 'unknown' for the initial state before we know if user is logged in.
 enum AuthStatus { unknown, idle, loading, authenticated, unauthenticated, error }
 
 class AuthViewModel extends ChangeNotifier {
@@ -11,7 +10,6 @@ class AuthViewModel extends ChangeNotifier {
 
   AuthViewModel(this._authRepository);
 
-  // Start with 'unknown' status.
   AuthStatus _status = AuthStatus.unknown;
   String? _errorMessage;
   UserProfileDTO? _user;
@@ -20,18 +18,11 @@ class AuthViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   UserProfileDTO? get user => _user;
 
-  /// NEW METHOD: Checks for a saved token on app startup.
   Future<void> checkInitialAuth() async {
     try {
-      // This method attempts to get the user profile using a stored token.
       _user = await _authRepository.getAuthenticated();
-      if (_user != null) {
-        _status = AuthStatus.authenticated;
-      } else {
-        _status = AuthStatus.unauthenticated;
-      }
+      _status = _user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated;
     } catch (_) {
-      // If any error occurs (e.g., token expired, network error), treat as unauthenticated.
       _status = AuthStatus.unauthenticated;
     }
     notifyListeners();
@@ -51,12 +42,27 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// This logout method is now more robust.
   Future<void> logout() async {
-    await _authRepository.logout();
-    _user = null;
-    _status = AuthStatus.unauthenticated;
-    notifyListeners();
+    try {
+      // Attempt to log out from the server.
+      await _authRepository.logout();
+    } catch (e) {
+      // If the server call fails, we print the error but DO NOT stop.
+      // The user must be logged out on the device regardless.
+      debugPrint("Server logout failed, but proceeding with local logout: $e");
+    } finally {
+      // This 'finally' block ALWAYS runs, even if the 'try' block fails.
+      // This guarantees the local token and state are cleared.
+      _user = null;
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+    }
   }
 
-// Other methods like register() would go here...
+  void acknowledgeError() {
+    _status = AuthStatus.idle;
+    _errorMessage = null;
+    notifyListeners();
+  }
 }

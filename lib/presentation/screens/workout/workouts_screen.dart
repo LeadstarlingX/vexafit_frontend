@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
 
-import '../../data/models/workout/workout_dto.dart';
-import '../viewmodels/auth/auth_view_model.dart';
-import '../viewmodels/workout/workout_view_model.dart';
-import '../widgets/loading_indicator.dart';
+import '../../../core/utils/view_state.dart';
+import '../../../data/models/workout/workout_dto.dart';
+import '../../viewmodels/workout/workout_view_model.dart';
+
 class WorkoutsScreen extends StatefulWidget {
   const WorkoutsScreen({super.key});
 
@@ -12,39 +14,52 @@ class WorkoutsScreen extends StatefulWidget {
   State<WorkoutsScreen> createState() => _WorkoutsScreenState();
 }
 
-class _WorkoutsScreenState extends State<WorkoutsScreen> {
+class _WorkoutsScreenState extends State<WorkoutsScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
-    // Fetch data when the screen is first loaded.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authViewModel = context.read<AuthViewModel>();
-      context.read<WorkoutViewModel>().fetchWorkouts(authViewModel.user?.id);
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
     });
+    // --- THIS IS THE FIX ---
+    // We no longer need to call fetchWorkouts() here.
+    // The ViewModel does it automatically when the user logs in.
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<WorkoutViewModel>();
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        // We use a nested AppBar for the TabBar
-        appBar: AppBar(
-          toolbarHeight: 0, // Hide the default AppBar
-          bottom: TabBar(
-            tabs: const [
-              Tab(text: 'Predefined'),
-              Tab(text: 'My Workouts'),
-            ],
-            labelColor: Theme.of(context).colorScheme.primary,
-            unselectedLabelColor: Colors.white70,
-            indicatorColor: Theme.of(context).colorScheme.primary,
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 0,
+        automaticallyImplyLeading: false,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Predefined'),
+            Tab(text: 'My Workouts'),
+          ],
         ),
-        body: _buildBody(viewModel),
       ),
+      body: _buildBody(viewModel),
+      floatingActionButton: _tabController.index == 1
+          ? FloatingActionButton(
+        onPressed: () {
+          context.go('/home/create-workout');
+        },
+        child: const Icon(Icons.add),
+      )
+          : null,
     );
   }
 
@@ -56,6 +71,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         return Center(child: Text(viewModel.errorMessage ?? 'An error occurred.'));
       case ViewState.success:
         return TabBarView(
+          controller: _tabController,
           children: [
             _WorkoutList(workouts: viewModel.predefinedWorkouts),
             _WorkoutList(workouts: viewModel.customWorkouts),
@@ -63,12 +79,11 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         );
       case ViewState.idle:
       default:
-        return const SizedBox.shrink();
+        return const Center(child: Text('Welcome! Select a tab.'));
     }
   }
 }
 
-// A helper widget to display a list of workouts
 class _WorkoutList extends StatelessWidget {
   final List<WorkoutDTO> workouts;
   const _WorkoutList({required this.workouts});
@@ -85,15 +100,14 @@ class _WorkoutList extends StatelessWidget {
         final workout = workouts[index];
         return Card(
           child: ListTile(
-            title: Text(workout.name, style: Theme.of(context).textTheme.titleMedium),
+            title: Text(workout.name),
             subtitle: Text(
               workout.description,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
             ),
             onTap: () {
-              // Navigate to workout details screen
+              context.go('/home/workout-details', extra: workout);
             },
           ),
         );

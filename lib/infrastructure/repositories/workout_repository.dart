@@ -1,9 +1,10 @@
 import 'package:vexafit_frontend/data/irepositories/i_workout_repository.dart';
+import 'package:vexafit_frontend/data/models/api_response.dart';
 import 'package:vexafit_frontend/infrastructure/services/workout_api_service.dart';
-
-import '../../data/models/api_response.dart';
 import '../../data/models/workout/workout_dto.dart';
 import '../../data/models/workout/workout_enum.dart';
+
+
 
 class WorkoutRepository implements IWorkoutRepository {
   final WorkoutApiService _workoutApiService;
@@ -26,7 +27,6 @@ class WorkoutRepository implements IWorkoutRepository {
         userId: userId,
       );
 
-      // The actual list of workouts is nested inside the 'data' key.
       final apiResponse = ApiResponse<List<WorkoutDTO>>.fromJson(
         response.data,
             (data) => (data as List<dynamic>)
@@ -34,40 +34,58 @@ class WorkoutRepository implements IWorkoutRepository {
             .toList(),
       );
 
-      // 3. Check if the API call was successful and return the data.
       if (apiResponse.isSuccess && apiResponse.data != null) {
         return apiResponse.data!;
       } else {
-        // If the API call failed, throw an exception with the server's message.
         throw Exception(apiResponse.message ?? 'Failed to fetch workouts');
       }
     } catch (e) {
-      // Propagate the error to be handled by the ViewModel.
       rethrow;
     }
   }
 
   @override
-  Future<WorkoutDTO> createWorkout(WorkoutDTO workout) {
-    // TODO: implement createWorkout
-    throw UnimplementedError();
+  Future<void> createWorkout({required String name, required String description}) async {
+    try {
+      await _workoutApiService.createWorkout(name: name, description: description);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<bool> deleteWorkout(int id) {
-    // TODO: implement deleteWorkout
-    throw UnimplementedError();
+  Future<void> updateWorkout({required int workoutId, String? name, String? description}) async {
+    try {
+      await _workoutApiService.updateWorkout(workoutId: workoutId, name: name, description: description);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<WorkoutDTO?> getWorkoutById(int id) {
-    // TODO: implement getWorkoutById
-    throw UnimplementedError();
+  Future<void> deleteWorkout(int workoutId) async {
+    try {
+      await _workoutApiService.deleteWorkout(workoutId);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<WorkoutDTO> updateWorkout(int id, WorkoutDTO workout) {
-    // TODO: implement updateWorkout
-    throw UnimplementedError();
+  Future<void> addExerciseToWorkout({required int workoutId, required int exerciseId}) async {
+    try {
+      await _workoutApiService.addExerciseToWorkout(workoutId: workoutId, exerciseId: exerciseId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> removeExerciseFromWorkout({required int workoutId, required int exerciseId}) async {
+    try {
+      await _workoutApiService.removeExerciseFromWorkout(workoutId: workoutId, exerciseId: exerciseId);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

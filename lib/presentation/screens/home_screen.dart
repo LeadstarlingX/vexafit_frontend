@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
+import '../../core/utils/view_state.dart';
 import '../../data/models/workout/workout_dto.dart';
 import '../viewmodels/auth/auth_view_model.dart';
 import '../viewmodels/workout/workout_view_model.dart';
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final userId = authViewModel.user?.id;
 
       // Correctly call fetchWorkouts with the userId.
-      context.read<WorkoutViewModel>().fetchWorkouts(userId);
+      context.read<WorkoutViewModel>().fetchWorkouts();
     });
   }
 

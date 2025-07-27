@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:vexafit_frontend/presentation/screens/workouts_screen.dart';
 
-// --- Placeholder Pages for the other Tabs ---
-class ExercisesPagePlaceholder extends StatelessWidget {
-  const ExercisesPagePlaceholder({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text('Exercises Page'));
-}
-
-class ProfilePagePlaceholder extends StatelessWidget {
-  const ProfilePagePlaceholder({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text('Profile Page'));
-}
-// ------------------------------------
+import 'exercise_screen.dart';
+import 'profile_screen.dart';
+import 'workout/workouts_screen.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -27,10 +16,9 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   // The pages that correspond to the tabs in the navigation bar.
   static const List<Widget> _widgetOptions = <Widget>[
-    // Replaced the placeholder with our real WorkoutsScreen!
     WorkoutsScreen(),
-    ExercisesPagePlaceholder(),
-    ProfilePagePlaceholder(),
+    ExerciseScreen(),
+    ProfileScreen(),
   ];
 
   // The titles for the AppBar that correspond to each page.
@@ -48,12 +36,18 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The router now handles redirection, so we don't need to listen for auth changes here.
+    // This makes the widget simpler and more reliable.
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_widgetTitles.elementAt(_selectedIndex)),
+        automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      // Using IndexedStack preserves the state of each screen when switching tabs.
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -72,7 +66,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        // Use the theme colors for the navigation bar
         backgroundColor: Theme.of(context).colorScheme.surface,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.white70,
