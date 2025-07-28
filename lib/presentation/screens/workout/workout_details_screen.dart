@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
 import '../../../core/utils/view_state.dart';
 import '../../../data/models/workout/workout_dto.dart';
+import '../../../data/models/workout/workout_exercise_dto.dart';
 import '../../viewmodels/auth/auth_view_model.dart';
 import '../../viewmodels/workout/workout_details_view_model.dart';
 import '../../viewmodels/workout/workout_view_model.dart';
@@ -18,14 +19,11 @@ class WorkoutDetailsScreen extends StatefulWidget {
 }
 
 class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
-  // --- THIS IS THE FIX (Part 1) ---
-  // Store a reference to the ViewModel.
   late final WorkoutDetailsViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    // Get the ViewModel instance once and store it.
     _viewModel = context.read<WorkoutDetailsViewModel>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -40,27 +38,28 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
 
   @override
   void dispose() {
-    // --- THIS IS THE FIX (Part 2) ---
-    // Use the stored reference to remove the listener, not context.read().
     _viewModel.removeListener(_onActionStateChanged);
     super.dispose();
   }
 
   void _onActionStateChanged() {
-    // We can still use the stored _viewModel here.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       if (_viewModel.actionState == DetailsActionState.success) {
-        context.read<WorkoutViewModel>().removeWorkoutFromList(widget.workout.id);
-        context.pop();
+        // After a successful action, we might want to refresh the main list
+        // or just show a success message. For now, we pop on delete.
+        if (context.canPop()) {
+          context.read<WorkoutViewModel>().removeWorkoutFromList(widget.workout.id);
+          context.pop();
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Workout deleted successfully!'), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Action successful!'), backgroundColor: Colors.green),
         );
       } else if (_viewModel.actionState == DetailsActionState.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_viewModel.errorMessage ?? 'Failed to delete workout.'),
+            content: Text(_viewModel.errorMessage ?? 'An error occurred.'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -78,16 +77,12 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
           title: const Text('Delete Workout'),
           content: const Text('Are you sure you want to delete this workout? This action cannot be undone.'),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(dialogContext).pop(),
-            ),
+            TextButton(child: const Text('Cancel'), onPressed: () => Navigator.of(dialogContext).pop()),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
               child: const Text('Delete'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                // Use the stored viewModel to call the delete method.
                 _viewModel.deleteWorkout();
               },
             ),
@@ -100,7 +95,6 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final authUser = context.watch<AuthViewModel>().user;
-    // We still watch here to rebuild the UI when the state changes.
     final viewModel = context.watch<WorkoutDetailsViewModel>();
 
     final isCustomWorkout = widget.workout.userId == authUser?.id;
@@ -112,9 +106,7 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
           if (isCustomWorkout)
             IconButton(
               icon: const Icon(Icons.edit),
-              onPressed: () {
-                // TODO: Navigate to an edit screen.
-              },
+              onPressed: () { /* TODO: Navigate to an edit screen for name/desc */ },
             ),
           if (isCustomWorkout)
             IconButton(
@@ -125,53 +117,145 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
       ),
       body: viewModel.state == ViewState.loading || viewModel.state == ViewState.idle
           ? const LoadingIndicator()
-          : SingleChildScrollView(
+          : _buildWorkoutDetails(context, viewModel.workout!, isCustomWorkout),
+      floatingActionButton: isCustomWorkout
+          ? FloatingActionButton(
+        onPressed: () {
+          // TODO: Navigate to a screen to select an exercise to add.
+        },
+        child: const Icon(Icons.add),
+      )
+          : null,
+    );
+  }
+
+  Widget _buildWorkoutDetails(BuildContext context, WorkoutDTO workout, bool isCustomWorkout) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(workout.name, style: Theme.of(context).textTheme.headlineMedium),
+          const SizedBox(height: 8),
+          Text(workout.description, style: Theme.of(context).textTheme.bodyLarge),
+          const Divider(height: 40),
+          Text('Exercises', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 16),
+          if (workout.workoutExercises.isEmpty)
+            const Center(child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('This workout has no exercises yet.'),
+            ))
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: workout.workoutExercises.length,
+              itemBuilder: (context, index) {
+                final workoutExercise = workout.workoutExercises[index];
+                return _ExerciseDetailCard(
+                  workoutExercise: workoutExercise,
+                  isEditable: isCustomWorkout,
+                  onDelete: () {
+                    _viewModel.removeExerciseFromWorkout(workoutExercise.id);
+                  },
+                  onEdit: () {
+                    // TODO: Show a dialog to edit sets, reps, etc.
+                  },
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// A new widget to display the details of an exercise within a workout.
+class _ExerciseDetailCard extends StatelessWidget {
+  final WorkoutExerciseDTO workoutExercise;
+  final bool isEditable;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
+
+  const _ExerciseDetailCard({
+    required this.workoutExercise,
+    required this.isEditable,
+    required this.onDelete,
+    required this.onEdit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final exercise = workoutExercise.exercise;
+    if (exercise == null) return const SizedBox.shrink();
+
+    return Card(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.workout.name,
-              style: Theme.of(context).textTheme.headlineMedium,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    exercise.name,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                if (isEditable)
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') onEdit();
+                      if (value == 'delete') onDelete();
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Text('Edit'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Text('Remove', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
-              widget.workout.description,
-              style: Theme.of(context).textTheme.bodyLarge,
+              exercise.description,
+              style: Theme.of(context).textTheme.bodyMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            const Divider(height: 40),
-            Text(
-              'Exercises',
-              style: Theme.of(context).textTheme.titleLarge,
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatColumn('Sets', workoutExercise.sets.toString()),
+                _buildStatColumn('Reps', workoutExercise.reps.toString()),
+                if (workoutExercise.weightKg != null)
+                  _buildStatColumn('Weight', '${workoutExercise.weightKg} kg'),
+                if (workoutExercise.durationSeconds != null)
+                  _buildStatColumn('Time', '${workoutExercise.durationSeconds}s'),
+              ],
             ),
-            const SizedBox(height: 16),
-            if (widget.workout.exercises.isEmpty)
-              const Center(child: Text('This workout has no exercises yet.'))
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.workout.exercises.length,
-                itemBuilder: (context, index) {
-                  final exercise = widget.workout.exercises[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(exercise.name),
-                      subtitle: Text(
-                        exercise.description,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onTap: () {
-                        // TODO: Navigate to this specific exercise's details page.
-                      },
-                    ),
-                  );
-                },
-              ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatColumn(String label, String value) {
+    return Column(
+      children: [
+        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+      ],
     );
   }
 }

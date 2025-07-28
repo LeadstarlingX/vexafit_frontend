@@ -1,37 +1,36 @@
 
-import '../exercise/exercise_dto.dart';
+
+import 'package:vexafit_frontend/data/models/workout/workout_exercise_dto.dart';
 
 class WorkoutDTO {
   final int id;
   final String name;
   final String description;
   final String? userId;
-  final List<ExerciseDTO> exercises;
+  final List<WorkoutExerciseDTO> workoutExercises;
 
   WorkoutDTO({
     required this.id,
     required this.name,
     required this.description,
     this.userId,
-    required this.exercises,
+    required this.workoutExercises,
   });
 
   factory WorkoutDTO.fromJson(Map<String, dynamic> json) {
-    var exerciseList = (json['Exercises'] as List<dynamic>?)
-        ?.map((e) => ExerciseDTO.fromJson(e))
+    var exerciseList = (json['WorkoutExercises'] as List<dynamic>?)
+        ?.map((e) => WorkoutExerciseDTO.fromJson(e))
         .toList() ??
         [];
 
     return WorkoutDTO(
-      // Using PascalCase for all response fields
       id: json['Id'] ?? 0,
       name: json['Name'] ?? 'Unnamed Workout',
       description: json['Description'] ?? '',
       userId: json['UserId'],
-      exercises: exerciseList,
+      workoutExercises: exerciseList,
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -39,8 +38,7 @@ class WorkoutDTO {
       'name': name,
       'description': description,
       'userId': userId,
-      'exercises': exercises.map((e) => e.toJson()).toList(),
+      'workoutExercises': workoutExercises.map((e) => e.toJson()).toList(),
     };
   }
-
 }

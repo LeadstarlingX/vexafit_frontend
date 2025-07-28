@@ -59,7 +59,7 @@ class AppTheme {
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: const Color(0xFF6200EE), // Color for the selected icon and label
-      unselectedItemColor: Colors.grey[600],    // Color for the unselected items
+      unselectedItemColor: Colors.grey,    // Color for the unselected items
       elevation: 2,
     ),
   );

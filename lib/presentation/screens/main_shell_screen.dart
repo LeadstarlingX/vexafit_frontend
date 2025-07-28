@@ -66,9 +66,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.white70,
       ),
     );
   }

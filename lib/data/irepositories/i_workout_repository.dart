@@ -1,3 +1,5 @@
+
+
 import '../models/workout/workout_dto.dart';
 import '../models/workout/workout_enum.dart';
 
@@ -9,15 +11,30 @@ abstract class IWorkoutRepository {
     String? userId,
   });
 
-  // Corrected to take simple parameters, not a full object.
   Future<void> createWorkout({required String name, required String description});
 
-  // Corrected to take simple parameters.
   Future<void> updateWorkout({required int workoutId, String? name, String? description});
 
   Future<void> deleteWorkout(int workoutId);
 
-  Future<void> addExerciseToWorkout({required int workoutId, required int exerciseId});
+  // --- NEW AND UPDATED METHODS ---
+  Future<void> addExerciseToWorkout({
+    required int workoutId,
+    required int exerciseId,
+    required int sets,
+    required int reps,
+    int? weightKg,
+    int? durationSeconds,
+  });
 
-  Future<void> removeExerciseFromWorkout({required int workoutId, required int exerciseId});
+  Future<void> updateExerciseInWorkout({
+    required int workoutExerciseId, // This is the ID of the link, not the exercise
+    required int sets,
+    required int reps,
+    int? weightKg,
+    int? durationSeconds,
+  });
+
+  // This now takes the ID of the WorkoutExercise link, as per your new swagger file.
+  Future<void> removeExerciseFromWorkout(int workoutExerciseId);
 }

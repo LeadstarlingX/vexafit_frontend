@@ -1,6 +1,6 @@
 class ApiRoutes {
-  // Base URL - you'll need to update this with your actual IP
-  static const String baseUrl = 'http://10.0.2.2:5232/';
+  // Base URL
+  static const String baseUrl = 'http://10.0.2.2:5232';
 
   // Auth endpoints
   static const String login = '/api/Auth/Login';
@@ -10,7 +10,7 @@ class ApiRoutes {
 
   // Category endpoints
   static const String categoryGetAll = '/api/Category/GetAll';
-  static String categoryGetById(int id) => '/api/Category/GetById/$id';
+  static const String categoryGetById = '/api/Category/GetById';
   static const String categoryInsert = '/api/Category/Insert';
   static const String categoryUpdate = '/api/Category/Update';
   static const String categoryDelete = '/api/Category/Delete';
@@ -24,10 +24,11 @@ class ApiRoutes {
 
   // Workout endpoints
   static const String workoutGetAll = '/api/Workout/GetAll';
-  static String workoutGetById(int id) => '/api/Workout/GetById/$id';
+  static const String workoutGetById = '/api/Workout/GetById';
   static const String workoutInsert = '/api/Workout/Insert';
-  static String workoutUpdate(int id) => '/api/Workout/Update/$id';
-  static String workoutDelete(int id) => '/api/Workout/Delete/$id';
+  static const String workoutUpdate = '/api/Workout/Update';
+  static const String workoutDelete = '/api/Workout/Delete';
   static const String workoutAddToWorkout = '/api/Workout/AddToWorkout';
+  static const String workoutUpdateExerciseInWorkout = '/api/Workout/UpdateExerciseInWorkout';
   static const String workoutDeleteFromWorkout = '/api/Workout/DeleteFromWorkout';
 }

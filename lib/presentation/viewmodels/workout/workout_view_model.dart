@@ -36,6 +36,31 @@ class WorkoutViewModel extends ChangeNotifier {
     }
   }
 
+
+  Future<void> createWorkout({
+    required String name,
+    required String description,
+  }) async {
+    // Use a temporary loading state for the action
+    _state = ViewState.loading;
+    notifyListeners();
+
+    try {
+      // Create a DTO object to pass to the repository
+
+
+      await _workoutRepository.createWorkout(name: name, description: description);
+
+      // After creating, immediately refetch the workouts to update the UI.
+      await fetchWorkouts();
+    } catch (e) {
+      _state = ViewState.error;
+      _errorMessage = e.toString();
+      // Important: notify listeners even on error to stop the loading indicator
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchWorkouts() async {
     final userId = _authViewModel.user?.id;
     _state = ViewState.loading;

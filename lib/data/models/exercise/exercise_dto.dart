@@ -1,5 +1,4 @@
 
-
 import 'package:vexafit_frontend/data/models/exercise/video_dto.dart';
 
 import '../category/category_dto.dart';
@@ -9,8 +8,8 @@ class ExerciseDTO {
   final int id;
   final String name;
   final String description;
-  final List<ImageDTO>? images;
-  final List<VideoDTO>? videos;
+  final List<ImageDTO> images;
+  final List<VideoDTO> videos;
   final List<CategoryDTO> categories;
 
   ExerciseDTO({
@@ -36,7 +35,6 @@ class ExerciseDTO {
         .toList() ?? [];
 
     return ExerciseDTO(
-      // Using PascalCase for all response fields
       id: json['Id'] ?? 0,
       name: json['Name'] ?? 'Unnamed Exercise',
       description: json['Description'] ?? '',
@@ -50,7 +48,10 @@ class ExerciseDTO {
     return {
       'id': id,
       'name': name,
-      'description': description
+      'description': description,
+      'images': images.map((e) => e.toJson()).toList(),
+      'videos': videos.map((e) => e.toJson()).toList(),
+      'categories': categories.map((e) => e.toJson()).toList(),
     };
   }
 }
