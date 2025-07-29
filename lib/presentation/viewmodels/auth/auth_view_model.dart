@@ -20,20 +20,22 @@ class AuthViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   UserProfileDTO? get user => _user;
 
-  Future<void> register(RegisterDTO dto) async {
+  Future<bool> register(RegisterDTO dto) async {
     _status = AuthStatus.loading;
     notifyListeners();
 
     try {
-      // After a successful registration, the user is typically
-      // considered logged in immediately.
       await _authRepository.register(dto);
-      _status = AuthStatus.authenticated;
+      _status = AuthStatus.idle;
+      notifyListeners();
+      return true;
+
     } catch (e) {
       _status = AuthStatus.error;
       _errorMessage = e.toString();
+      notifyListeners();
+      return false;
     }
-    notifyListeners();
   }
 
   Future<void> checkInitialAuth() async {

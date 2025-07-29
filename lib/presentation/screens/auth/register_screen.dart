@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/data/models/auth/register_dto.dart';
 import 'package:vexafit_frontend/presentation/widgets/primary_button.dart';
-
 import '../../viewmodels/auth/auth_view_model.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -15,22 +14,35 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _usernameController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _passwordController;
-  late final TextEditingController _confirmPasswordController;
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  // ✨ FIX: Hold a reference to the ViewModel
+  late final AuthViewModel _authViewModel;
+
+  bool _isLengthValid = false;
+  bool _hasUppercase = false;
+  bool _hasDigit = false;
+  bool _hasSpecialChar = false;
 
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController();
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
+    // ✨ FIX: Get the ViewModel instance here
+    _authViewModel = context.read<AuthViewModel>();
+    // Add listeners
+    _authViewModel.addListener(_onAuthStatusChanged);
+    _passwordController.addListener(_validatePasswordRules);
   }
 
   @override
   void dispose() {
+    // ✨ FIX: Use the stored reference, not context.read()
+    _authViewModel.removeListener(_onAuthStatusChanged);
+    _passwordController.removeListener(_validatePasswordRules);
+    // Dispose controllers
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -38,20 +50,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  Future<void> _onRegister() async {
-    if (_formKey.currentState!.validate()) {
-      final authViewModel = context.read<AuthViewModel>();
-      final dto = RegisterDTO(
-        userName: _usernameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-        confirmPassword: _confirmPasswordController.text.trim(),
-        role: RoleEnum.user, // Default role for new users
-      );
+  void _validatePasswordRules() {
+    final password = _passwordController.text;
+    setState(() {
+      _isLengthValid = password.length >= 6;
+      _hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      _hasDigit = password.contains(RegExp(r'[0-9]'));
+      _hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    });
+  }
 
-      await authViewModel.register(dto);
+  void _onAuthStatusChanged() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
 
-      if (mounted && authViewModel.status != AuthStatus.error) {
+      if (_authViewModel.status == AuthStatus.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_authViewModel.errorMessage ?? 'An unknown registration error occurred.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+        _authViewModel.acknowledgeError();
+      }
+      else if (_authViewModel.status == AuthStatus.authenticated) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Registration successful! Please log in.'),
@@ -60,17 +82,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
         context.go('/login');
       }
+    });
+  }
+
+  Future<void> _onRegister() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final dto = RegisterDTO(
+        userName: _usernameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        confirmPassword: _confirmPasswordController.text.trim(),
+        role: RoleEnum.user,
+      );
+
+      // 1. Call the updated register method
+      final success = await _authViewModel.register(dto);
+
+      // 2. If it returns true, show a message and navigate
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration successful! Please log in.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/login');
+      }
+      // If it returns false, the error will be handled by your listener.
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = context.watch<AuthViewModel>();
+    // We can still use context.watch here to listen for rebuilds
+    final authStatus = context.watch<AuthViewModel>().status;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Account'),
-      ),
+      appBar: AppBar(title: const Text('Create Account')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -101,10 +149,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Please enter a password';
-                  if (value.length < 6) return 'Password must be at least 6 characters';
+                  if (!_isLengthValid || !_hasUppercase || !_hasDigit || !_hasSpecialChar) {
+                    return 'Please fulfill all password requirements.';
+                  }
                   return null;
                 },
               ),
+              const SizedBox(height: 24),
+              _PasswordRequirement(text: 'At least 6 characters', isValid: _isLengthValid),
+              _PasswordRequirement(text: 'An uppercase letter (A-Z)', isValid: _hasUppercase),
+              _PasswordRequirement(text: 'A digit (0-9)', isValid: _hasDigit),
+              _PasswordRequirement(text: 'A special character (e.g., !, @, #)', isValid: _hasSpecialChar),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
@@ -118,7 +173,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 32),
               PrimaryButton(
                 text: 'Sign Up',
-                isLoading: authViewModel.status == AuthStatus.loading,
+                isLoading: authStatus == AuthStatus.loading,
                 onPressed: _onRegister,
               ),
               const SizedBox(height: 16),
@@ -129,6 +184,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PasswordRequirement extends StatelessWidget {
+  final String text;
+  final bool isValid;
+  const _PasswordRequirement({required this.text, required this.isValid});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isValid ? Colors.green : Colors.red;
+    final icon = isValid ? Icons.check_circle : Icons.cancel;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Text(text, style: TextStyle(color: color)),
+        ],
       ),
     );
   }

@@ -54,21 +54,29 @@ GoRouter createAppRouter(AuthViewModel authViewModel) {
     ],
     redirect: (BuildContext context, GoRouterState state) {
       final authStatus = authViewModel.status;
+      final isLoggedIn = authStatus == AuthStatus.authenticated;
+
+      // Define all public routes
       final isSplashScreen = state.matchedLocation == '/';
+      final isLoggingIn = state.matchedLocation == '/login';
+      final isRegistering = state.matchedLocation == '/register';
+
+      // Allow access to splash screen while auth state is unknown
       if (authStatus == AuthStatus.unknown && isSplashScreen) {
         return null;
       }
-      final isLoggedIn = authStatus == AuthStatus.authenticated;
-      final isLoggingIn = state.matchedLocation == '/login';
 
+      // If user is logged in but on the login page, redirect to home
       if (isLoggedIn && isLoggingIn) {
         return '/home';
       }
 
-      if (!isLoggedIn && !isLoggingIn) {
+
+      if (!isLoggedIn && !isLoggingIn && !isRegistering) {
         return '/login';
       }
 
+      // In all other cases, allow navigation
       return null;
     },
     errorBuilder: (context, state) => Scaffold(
