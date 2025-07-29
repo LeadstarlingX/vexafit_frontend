@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'exercise_screen.dart';
 import 'profile_screen.dart';
-import 'workout/workouts_screen.dart';
+import 'workouts_screen.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});

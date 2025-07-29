@@ -4,7 +4,6 @@ import 'package:vexafit_frontend/data/irepositories/i_workout_repository.dart';
 import '../../../core/utils/view_state.dart';
 import '../../../data/models/exercise/exercise_dto.dart';
 import '../../../data/models/workout/workout_dto.dart';
-import '../../../data/models/workout/workout_exercise_dto.dart';
 
 enum DetailsActionState { idle, loading, success, error }
 
@@ -31,27 +30,6 @@ class WorkoutDetailsViewModel extends ChangeNotifier {
   }
 
 
-  // Map<String, List<WorkoutExerciseDTO>> get categorizedExercises {
-  //   if (_workout == null) return {};
-  //
-  //   final Map<String, List<WorkoutExerciseDTO>> grouped = {};
-  //
-  //   for (final workoutExercise in _workout!.workoutExercises) {
-  //     if (workoutExercise.exercise?.categories != null) {
-  //       for (final category in workoutExercise.exercise!.categories) {
-  //         // Use the category type name as the key (e.g., "MuscleGroup")
-  //         final key = category.type.name;
-  //         if (grouped[key] == null) {
-  //           grouped[key] = [];
-  //         }
-  //         // Add the exercise to the list for that category type
-  //         grouped[key]!.add(workoutExercise);
-  //       }
-  //     }
-  //   }
-  //   return grouped;
-  // }
-
   Future<void> fetchWorkoutById(int workoutId) async {
     _state = ViewState.loading;
     notifyListeners();
@@ -75,7 +53,6 @@ class WorkoutDetailsViewModel extends ChangeNotifier {
     // A full implementation would fetch the single workout again.
   }
 
-  // --- NEW AND UPDATED METHODS ---
 
   Future<void> addExerciseToWorkout({
     required ExerciseDTO exerciseToAdd,
@@ -151,7 +128,6 @@ class WorkoutDetailsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ------------------------------------
 
   Future<void> deleteWorkout() async {
     if (_workout == null) return;
@@ -160,6 +136,7 @@ class WorkoutDetailsViewModel extends ChangeNotifier {
     try {
       await _workoutRepository.deleteWorkout(_workout!.id);
       _actionState = DetailsActionState.success;
+      _workout = null;
     } catch (e) {
       _actionState = DetailsActionState.error;
       _errorMessage = e.toString();

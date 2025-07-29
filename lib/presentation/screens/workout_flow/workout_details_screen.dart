@@ -10,7 +10,7 @@ import '../../../data/models/workout/workout_exercise_dto.dart';
 import '../../viewmodels/auth/auth_view_model.dart';
 import '../../viewmodels/workout/workout_details_view_model.dart';
 import '../../viewmodels/workout/workout_view_model.dart';
-import '../add_exercise_details_dialog.dart';
+import 'add_exercise_details_dialog.dart';
 
 class WorkoutDetailsScreen extends StatefulWidget {
   final WorkoutDTO workout;
@@ -124,6 +124,12 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
   Widget build(BuildContext context) {
     final authUser = context.watch<AuthViewModel>().user;
     final viewModel = context.watch<WorkoutDetailsViewModel>();
+
+    if (viewModel.workout == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     final isCustomWorkout = widget.workout.userId == authUser?.id;
 

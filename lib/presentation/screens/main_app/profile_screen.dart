@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/presentation/viewmodels/theme/theme_view_model.dart';
 import 'package:vexafit_frontend/presentation/widgets/primary_button.dart';
-import '../viewmodels/auth/auth_view_model.dart';
+import '../../viewmodels/auth/auth_view_model.dart';
 
 
 class ProfileScreen extends StatelessWidget {

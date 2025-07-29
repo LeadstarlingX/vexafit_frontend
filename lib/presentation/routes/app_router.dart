@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/workout/workout_dto.dart';
 import '../screens/auth/login_screen.dart';
-import '../screens/main_shell_screen.dart';
-import '../screens/register_screen.dart';
-import '../screens/select_exercise_screen.dart';
+import '../screens/auth/register_screen.dart';
+import '../screens/main_app/main_shell_screen.dart';
+import '../screens/workout_flow/select_exercise_screen.dart';
 import '../screens/splash_screen.dart';
-import '../screens/workout/create_workout_screen.dart';
-import '../screens/workout/workout_details_screen.dart';
+import '../screens/workout_flow/create_workout_screen.dart';
+import '../screens/workout_flow/workout_details_screen.dart';
 import '../viewmodels/auth/auth_view_model.dart';
 
 GoRouter createAppRouter(AuthViewModel authViewModel) {

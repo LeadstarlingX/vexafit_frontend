@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vexafit_frontend/presentation/widgets/primary_button.dart';
-import '../../data/models/exercise/exercise_dto.dart';
+import '../../../data/models/exercise/exercise_dto.dart';
 
 class AddExerciseDetailsDialog extends StatefulWidget {
   final ExerciseDTO exercise;

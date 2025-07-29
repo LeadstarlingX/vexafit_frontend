@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/data/models/auth/register_dto.dart';
 import 'package:vexafit_frontend/presentation/widgets/primary_button.dart';
 
-import '../viewmodels/auth/auth_view_model.dart';
+import '../../viewmodels/auth/auth_view_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

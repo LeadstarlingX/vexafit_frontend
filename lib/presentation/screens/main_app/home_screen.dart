@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
-import '../../core/utils/view_state.dart';
-import '../../data/models/workout/workout_dto.dart';
-import '../viewmodels/auth/auth_view_model.dart';
-import '../viewmodels/workout/workout_view_model.dart';
+import '../../../core/utils/view_state.dart';
+import '../../../data/models/workout/workout_dto.dart';
+import '../../viewmodels/auth/auth_view_model.dart';
+import '../../viewmodels/workout/workout_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,13 +17,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // This is the correct way to fetch data when the screen loads.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Get the currently logged-in user's ID from the AuthViewModel.
-      final authViewModel = context.read<AuthViewModel>();
-      final userId = authViewModel.user?.id;
 
-      // Correctly call fetchWorkouts with the userId.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
       context.read<WorkoutViewModel>().fetchWorkouts();
     });
   }
