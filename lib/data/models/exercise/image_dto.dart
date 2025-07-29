@@ -14,7 +14,7 @@ class ImageDTO {
       // Corrected to PascalCase for the response
       id: json['Id'] ?? 0,
       alternativeText: json['AlternativeText'],
-      imageFile: json['ImageFile'],
+      imageFile: json['Url'],
     );
   }
 

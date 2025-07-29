@@ -15,7 +15,7 @@ class DioClient {
     // Initialize Dio with base options
     dio = Dio(
       BaseOptions(
-        baseUrl: ApiRoutes.baseUrl,
+        baseUrl: ApiRoutes.url,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         sendTimeout: const Duration(seconds: 15),

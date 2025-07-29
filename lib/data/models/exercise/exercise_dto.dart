@@ -21,6 +21,13 @@ class ExerciseDTO {
     required this.categories,
   });
 
+  String? get firstImageUrl {
+    if (images.isNotEmpty) {
+      return images.first.imageFile;
+    }
+    return null;
+  }
+
   factory ExerciseDTO.fromJson(Map<String, dynamic> json) {
     var imageList = (json['Image'] as List<dynamic>?)
         ?.map((e) => ImageDTO.fromJson(e))

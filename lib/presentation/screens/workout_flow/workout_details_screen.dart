@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:vexafit_frontend/core/constants/api_routes.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
 
 import '../../../core/utils/view_state.dart';
@@ -49,15 +50,13 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
       if (!mounted) return;
 
       if (_viewModel.actionState == DetailsActionState.success) {
-        // After a successful action, refresh the main workout list and show a message.
+        if (_viewModel.workout == null) {
+          context.pop();
+        }
         context.read<WorkoutViewModel>().fetchWorkouts();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Action successful!'), backgroundColor: Colors.green),
         );
-        // If the workout itself was deleted, pop the screen.
-        if (_viewModel.workout == null) {
-          context.pop();
-        }
       } else if (_viewModel.actionState == DetailsActionState.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -71,18 +70,15 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
   }
 
   Future<void> _navigateAndAddExercise() async {
-    // Navigate to the selection screen and wait for the user to pick an exercise.
     final selectedExercise = await context.push<ExerciseDTO>('/home/select-exercise');
 
     if (selectedExercise != null && mounted) {
-      // If an exercise was selected, show the details dialog.
       final details = await showDialog<Map<String, int?>>(
         context: context,
         builder: (_) => AddExerciseDetailsDialog(exercise: selectedExercise),
       );
 
       if (details != null && mounted) {
-        // If details were entered, call the ViewModel to add the exercise.
         await _viewModel.addExerciseToWorkout(
           exerciseToAdd: selectedExercise,
           sets: details['sets']!,
@@ -90,7 +86,6 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
           weightKg: details['weightKg'],
           durationSeconds: details['durationSeconds'],
         );
-        // After adding, we should refresh the workout to see the new exercise.
         await _viewModel.refreshWorkout();
       }
     }
@@ -131,11 +126,11 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
       );
     }
 
-    final isCustomWorkout = widget.workout.userId == authUser?.id;
+    final isCustomWorkout = viewModel.workout!.userId == authUser?.id;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.workout.name),
+        title: Text(viewModel.workout!.name),
         actions: [
           if (isCustomWorkout)
             IconButton(
@@ -220,62 +215,98 @@ class _ExerciseDetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final exercise = workoutExercise.exercise;
     if (exercise == null) return const SizedBox.shrink();
-
+    String prefUrl = ApiRoutes.url + '/images/';
+    print(prefUrl + exercise.firstImageUrl! + '\n');
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    exercise.name,
-                    style: Theme.of(context).textTheme.titleLarge,
+      clipBehavior: Clip.antiAlias,
+      margin: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Using the `firstImageUrl` getter to display the first image
+          if (exercise.firstImageUrl != null && exercise.firstImageUrl!.isNotEmpty)
+            Image.network(
+              prefUrl + exercise.firstImageUrl!,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  height: 200,
+                  color: Colors.grey[300],
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 200,
+                  color: Colors.grey[300],
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey[600],
+                    size: 50,
                   ),
+                );
+              },
+            ),
+
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        exercise.name,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    if (isEditable)
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') onEdit();
+                          if (value == 'delete') onDelete();
+                        },
+                        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                          const PopupMenuItem<String>(
+                            value: 'edit',
+                            child: Text('Edit'),
+                          ),
+                          const PopupMenuItem<String>(
+                            value: 'delete',
+                            child: Text('Remove', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                  ],
                 ),
-                if (isEditable)
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') onEdit();
-                      if (value == 'delete') onDelete();
-                    },
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        value: 'edit',
-                        child: Text('Edit'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'delete',
-                        child: Text('Remove', style: TextStyle(color: Colors.red)),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 8),
+                Text(
+                  exercise.description,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Divider(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatColumn('Sets', workoutExercise.sets.toString()),
+                    _buildStatColumn('Reps', workoutExercise.reps.toString()),
+                    if (workoutExercise.weightKg != null)
+                      _buildStatColumn('Weight', '${workoutExercise.weightKg} kg'),
+                    if (workoutExercise.durationSeconds != null)
+                      _buildStatColumn('Time', '${workoutExercise.durationSeconds}s'),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              exercise.description,
-              style: Theme.of(context).textTheme.bodyMedium,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const Divider(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatColumn('Sets', workoutExercise.sets.toString()),
-                _buildStatColumn('Reps', workoutExercise.reps.toString()),
-                if (workoutExercise.weightKg != null)
-                  _buildStatColumn('Weight', '${workoutExercise.weightKg} kg'),
-                if (workoutExercise.durationSeconds != null)
-                  _buildStatColumn('Time', '${workoutExercise.durationSeconds}s'),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
