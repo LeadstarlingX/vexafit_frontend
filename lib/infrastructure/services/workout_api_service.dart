@@ -9,6 +9,14 @@ class WorkoutApiService {
 
   WorkoutApiService({required DioClient dioClient}) : _dioClient = dioClient;
 
+  Future<Response> getWorkoutById(int workoutId) async {
+    return await _dioClient.dio.get(
+      ApiRoutes.workoutGetById,
+      queryParameters: {'Id': workoutId},
+    );
+  }
+
+
   Future<Response> getWorkouts({
     String? name,
     String? description,

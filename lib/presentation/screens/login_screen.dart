@@ -3,57 +3,22 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/data/models/auth/login_dto.dart';
 import 'package:vexafit_frontend/presentation/widgets/primary_button.dart';
-
 import '../viewmodels/auth/auth_view_model.dart';
 
-// Converted to a StatefulWidget for more robust event handling.
-class LoginScreen extends StatefulWidget {
+// This is now a simple StatelessWidget as the router handles navigation logic.
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
+  Widget build(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
 
-class _LoginScreenState extends State<LoginScreen> {
-  late final TextEditingController _emailController;
-  late final TextEditingController _passwordController;
+    final authViewModel = context.watch<AuthViewModel>();
+    final authStatus = authViewModel.status;
 
-  @override
-  void initState() {
-    super.initState();
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-
-    // We add a dedicated listener to the ViewModel in initState.
-    // This is the most reliable way to react to state changes for one-time events.
-    final authViewModel = context.read<AuthViewModel>();
-    authViewModel.addListener(_onAuthStatusChanged);
-  }
-
-  @override
-  void dispose() {
-    // It's crucial to remove the listener and dispose controllers
-    // to prevent memory leaks when the screen is destroyed.
-    context.read<AuthViewModel>().removeListener(_onAuthStatusChanged);
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  /// This function is the single handler for auth status changes.
-  void _onAuthStatusChanged() {
-    final authViewModel = context.read<AuthViewModel>();
-
-    // Use a post-frame callback to safely handle navigation and UI events
-    // immediately after the current build cycle is complete.
+    // This listener handles showing error messages.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Check if the widget is still in the tree before trying to use its context.
-      if (!mounted) return;
-
-      if (authViewModel.status == AuthStatus.authenticated) {
-        context.go('/home');
-      }
-
       if (authViewModel.status == AuthStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -61,19 +26,13 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
-        // After showing the error, reset the ViewModel's state so the user can try again.
         authViewModel.acknowledgeError();
       }
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // We use context.watch() here to rebuild the UI (specifically the button)
-    // whenever the authStatus changes.
-    final authStatus = context.watch<AuthViewModel>().status;
 
     return Scaffold(
+      // By removing the AppBar and SingleChildScrollView, the Column
+      // is now correctly centered within the screen's boundaries.
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -81,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // --- THIS TEXT WILL NOW BE VISIBLE ---
               Text(
                 'Welcome to Vexafit',
                 textAlign: TextAlign.center,
@@ -93,14 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 48),
+
               TextField(
-                controller: _emailController,
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: _passwordController,
+                controller: passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(labelText: 'Password'),
               ),
@@ -109,15 +70,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 text: 'Login',
                 isLoading: authStatus == AuthStatus.loading,
                 onPressed: () {
-                  final email = _emailController.text.trim();
-                  final password = _passwordController.text.trim();
+                  final email = emailController.text.trim();
+                  final password = passwordController.text.trim();
                   if (email.isNotEmpty && password.isNotEmpty) {
                     final loginDto = LoginDTO(email: email, password: password);
-                    // We use context.read() inside a callback as we only want to trigger an action, not listen.
                     context.read<AuthViewModel>().login(loginDto);
                   }
                 },
               ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => context.go('/register'),
+                child: const Text("Don't have an account? Sign Up"),
+              )
             ],
           ),
         ),

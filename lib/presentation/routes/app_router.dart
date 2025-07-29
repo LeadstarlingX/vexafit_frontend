@@ -3,12 +3,12 @@ import 'package:go_router/go_router.dart';
 import '../../data/models/workout/workout_dto.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/main_shell_screen.dart';
+import '../screens/register_screen.dart';
+import '../screens/select_exercise_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/workout/create_workout_screen.dart';
 import '../screens/workout/workout_details_screen.dart';
 import '../viewmodels/auth/auth_view_model.dart';
-
-
 
 GoRouter createAppRouter(AuthViewModel authViewModel) {
   return GoRouter(
@@ -24,6 +24,10 @@ GoRouter createAppRouter(AuthViewModel authViewModel) {
         builder: (context, state) => LoginScreen(),
       ),
       GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
         path: '/home',
         builder: (context, state) => const MainShellScreen(),
         routes: [
@@ -37,22 +41,23 @@ GoRouter createAppRouter(AuthViewModel authViewModel) {
               return WorkoutDetailsScreen(workout: workout);
             },
           ),
-          // --- NEW ROUTE ---
           GoRoute(
             path: 'create-workout',
             builder: (context, state) => const CreateWorkoutScreen(),
+          ),
+          GoRoute(
+            path: 'select-exercise',
+            builder: (context, state) => const SelectExerciseScreen(),
           ),
         ],
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {
       final authStatus = authViewModel.status;
-
       final isSplashScreen = state.matchedLocation == '/';
       if (authStatus == AuthStatus.unknown && isSplashScreen) {
         return null;
       }
-
       final isLoggedIn = authStatus == AuthStatus.authenticated;
       final isLoggingIn = state.matchedLocation == '/login';
 

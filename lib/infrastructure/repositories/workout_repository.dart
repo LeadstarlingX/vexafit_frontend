@@ -12,6 +12,24 @@ class WorkoutRepository implements IWorkoutRepository {
       : _workoutApiService = workoutApiService;
 
   @override
+  Future<WorkoutDTO> getWorkoutById(int workoutId) async {
+    try {
+      final response = await _workoutApiService.getWorkoutById(workoutId);
+      final apiResponse = ApiResponse<WorkoutDTO>.fromJson(
+        response.data,
+            (data) => WorkoutDTO.fromJson(data as Map<String, dynamic>),
+      );
+      if (apiResponse.isSuccess && apiResponse.data != null) {
+        return apiResponse.data!;
+      } else {
+        throw Exception(apiResponse.message ?? 'Failed to fetch workout details');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<WorkoutDTO>> getAllWorkouts({
     String? name,
     String? description,

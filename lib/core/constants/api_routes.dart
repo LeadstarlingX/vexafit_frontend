@@ -1,6 +1,7 @@
 class ApiRoutes {
   // Base URL
-  static const String baseUrl = 'http://10.0.2.2:5232';
+  static const String emulatorBaseUrl = 'http://10.0.2.2:5232';
+  static const String baseUrl = 'http://192.168.53.62:5232';
 
   // Auth endpoints
   static const String login = '/api/Auth/Login';

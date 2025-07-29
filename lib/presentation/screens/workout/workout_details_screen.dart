@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
+
 import '../../../core/utils/view_state.dart';
+import '../../../data/models/exercise/exercise_dto.dart';
 import '../../../data/models/workout/workout_dto.dart';
 import '../../../data/models/workout/workout_exercise_dto.dart';
 import '../../viewmodels/auth/auth_view_model.dart';
 import '../../viewmodels/workout/workout_details_view_model.dart';
 import '../../viewmodels/workout/workout_view_model.dart';
+import '../add_exercise_details_dialog.dart';
 
 class WorkoutDetailsScreen extends StatefulWidget {
   final WorkoutDTO workout;
@@ -28,8 +31,7 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _viewModel.resetActionState();
-        _viewModel.setWorkout(widget.workout);
+        _viewModel.fetchWorkoutById(widget.workout.id);
       }
     });
 
@@ -47,15 +49,15 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
       if (!mounted) return;
 
       if (_viewModel.actionState == DetailsActionState.success) {
-        // After a successful action, we might want to refresh the main list
-        // or just show a success message. For now, we pop on delete.
-        if (context.canPop()) {
-          context.read<WorkoutViewModel>().removeWorkoutFromList(widget.workout.id);
-          context.pop();
-        }
+        // After a successful action, refresh the main workout list and show a message.
+        context.read<WorkoutViewModel>().fetchWorkouts();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Action successful!'), backgroundColor: Colors.green),
         );
+        // If the workout itself was deleted, pop the screen.
+        if (_viewModel.workout == null) {
+          context.pop();
+        }
       } else if (_viewModel.actionState == DetailsActionState.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -66,6 +68,32 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
       }
       _viewModel.resetActionState();
     });
+  }
+
+  Future<void> _navigateAndAddExercise() async {
+    // Navigate to the selection screen and wait for the user to pick an exercise.
+    final selectedExercise = await context.push<ExerciseDTO>('/home/select-exercise');
+
+    if (selectedExercise != null && mounted) {
+      // If an exercise was selected, show the details dialog.
+      final details = await showDialog<Map<String, int?>>(
+        context: context,
+        builder: (_) => AddExerciseDetailsDialog(exercise: selectedExercise),
+      );
+
+      if (details != null && mounted) {
+        // If details were entered, call the ViewModel to add the exercise.
+        await _viewModel.addExerciseToWorkout(
+          exerciseToAdd: selectedExercise,
+          sets: details['sets']!,
+          reps: details['reps']!,
+          weightKg: details['weightKg'],
+          durationSeconds: details['durationSeconds'],
+        );
+        // After adding, we should refresh the workout to see the new exercise.
+        await _viewModel.refreshWorkout();
+      }
+    }
   }
 
   void _showDeleteConfirmationDialog() {
@@ -106,7 +134,7 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
           if (isCustomWorkout)
             IconButton(
               icon: const Icon(Icons.edit),
-              onPressed: () { /* TODO: Navigate to an edit screen for name/desc */ },
+              onPressed: () { /* TODO: Implement edit workout name/desc */ },
             ),
           if (isCustomWorkout)
             IconButton(
@@ -120,9 +148,7 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
           : _buildWorkoutDetails(context, viewModel.workout!, isCustomWorkout),
       floatingActionButton: isCustomWorkout
           ? FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to a screen to select an exercise to add.
-        },
+        onPressed: _navigateAndAddExercise,
         child: const Icon(Icons.add),
       )
           : null,
@@ -171,7 +197,6 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
   }
 }
 
-// A new widget to display the details of an exercise within a workout.
 class _ExerciseDetailCard extends StatelessWidget {
   final WorkoutExerciseDTO workoutExercise;
   final bool isEditable;

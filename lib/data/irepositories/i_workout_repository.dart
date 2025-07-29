@@ -11,6 +11,8 @@ abstract class IWorkoutRepository {
     String? userId,
   });
 
+  Future<WorkoutDTO> getWorkoutById(int workoutId);
+
   Future<void> createWorkout({required String name, required String description});
 
   Future<void> updateWorkout({required int workoutId, String? name, String? description});

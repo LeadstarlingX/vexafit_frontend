@@ -4,6 +4,7 @@ import 'package:vexafit_frontend/data/irepositories/i_workout_repository.dart';
 import '../../../core/utils/view_state.dart';
 import '../../../data/models/exercise/exercise_dto.dart';
 import '../../../data/models/workout/workout_dto.dart';
+import '../../../data/models/workout/workout_exercise_dto.dart';
 
 enum DetailsActionState { idle, loading, success, error }
 
@@ -29,9 +30,46 @@ class WorkoutDetailsViewModel extends ChangeNotifier {
     // The screen's initState will handle the initial setup.
   }
 
+
+  // Map<String, List<WorkoutExerciseDTO>> get categorizedExercises {
+  //   if (_workout == null) return {};
+  //
+  //   final Map<String, List<WorkoutExerciseDTO>> grouped = {};
+  //
+  //   for (final workoutExercise in _workout!.workoutExercises) {
+  //     if (workoutExercise.exercise?.categories != null) {
+  //       for (final category in workoutExercise.exercise!.categories) {
+  //         // Use the category type name as the key (e.g., "MuscleGroup")
+  //         final key = category.type.name;
+  //         if (grouped[key] == null) {
+  //           grouped[key] = [];
+  //         }
+  //         // Add the exercise to the list for that category type
+  //         grouped[key]!.add(workoutExercise);
+  //       }
+  //     }
+  //   }
+  //   return grouped;
+  // }
+
+  Future<void> fetchWorkoutById(int workoutId) async {
+    _state = ViewState.loading;
+    notifyListeners();
+    try {
+      // Fetch the most up-to-date version of the workout from the server.
+      _workout = await _workoutRepository.getWorkoutById(workoutId);
+      _state = ViewState.success;
+    } catch (e) {
+      _state = ViewState.error;
+      _errorMessage = e.toString();
+    }
+    notifyListeners();
+  }
+
   /// Refreshes the workout data from the server.
   Future<void> refreshWorkout() async {
     if (_workout == null) return;
+    await fetchWorkoutById(_workout!.id);
     // This assumes a getWorkoutById method exists in your repository.
     // For now, we'll rely on the main list refreshing.
     // A full implementation would fetch the single workout again.

@@ -3,6 +3,8 @@ import 'package:vexafit_frontend/data/models/auth/login_dto.dart';
 import 'package:vexafit_frontend/data/models/auth/user_profile_dto.dart';
 import 'package:vexafit_frontend/data/irepositories/i_auth_repository.dart';
 
+import '../../../data/models/auth/register_dto.dart';
+
 enum AuthStatus { unknown, idle, loading, authenticated, unauthenticated, error }
 
 class AuthViewModel extends ChangeNotifier {
@@ -17,6 +19,22 @@ class AuthViewModel extends ChangeNotifier {
   AuthStatus get status => _status;
   String? get errorMessage => _errorMessage;
   UserProfileDTO? get user => _user;
+
+  Future<void> register(RegisterDTO dto) async {
+    _status = AuthStatus.loading;
+    notifyListeners();
+
+    try {
+      // After a successful registration, the user is typically
+      // considered logged in immediately.
+      await _authRepository.register(dto);
+      _status = AuthStatus.authenticated;
+    } catch (e) {
+      _status = AuthStatus.error;
+      _errorMessage = e.toString();
+    }
+    notifyListeners();
+  }
 
   Future<void> checkInitialAuth() async {
     try {

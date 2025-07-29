@@ -19,6 +19,28 @@ class ExerciseViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  Map<String, List<ExerciseDTO>> _categorizedExercises = {};
+
+  Map<String, List<ExerciseDTO>> get categorizedExercises => _categorizedExercises;
+
+  /// Groups the flat list of exercises into a categorized map.
+  void _groupExercises() {
+    _categorizedExercises = {}; // Clear previous data
+    for (var exercise in _exercises) {
+      if (exercise.categories.isEmpty) {
+        // Add exercises with no category to a default group.
+        (_categorizedExercises['Uncategorized'] ??= []).add(exercise);
+      } else {
+        // An exercise can be in multiple categories.
+        for (var category in exercise.categories) {
+          if (category.name != null) {
+            (_categorizedExercises[category.name!] ??= []).add(exercise);
+          }
+        }
+      }
+    }
+  }
+
   /// Fetches all exercises from the repository.
   Future<void> fetchAllExercises({String? name}) async {
     _state = ViewState.loading;
@@ -26,6 +48,7 @@ class ExerciseViewModel extends ChangeNotifier {
 
     try {
       _exercises = await _exerciseRepository.getAllExercises(name: name);
+      _groupExercises();
       _state = ViewState.success;
     } catch (e) {
       _state = ViewState.error;
