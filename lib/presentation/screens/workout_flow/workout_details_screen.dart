@@ -215,8 +215,6 @@ class _ExerciseDetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final exercise = workoutExercise.exercise;
     if (exercise == null) return const SizedBox.shrink();
-    String prefUrl = ApiRoutes.url + '/images/';
-    print(prefUrl + exercise.firstImageUrl! + '\n');
     return Card(
       clipBehavior: Clip.antiAlias,
       margin: const EdgeInsets.only(bottom: 16.0),
@@ -226,7 +224,7 @@ class _ExerciseDetailCard extends StatelessWidget {
           // Using the `firstImageUrl` getter to display the first image
           if (exercise.firstImageUrl != null && exercise.firstImageUrl!.isNotEmpty)
             Image.network(
-              prefUrl + exercise.firstImageUrl!,
+              ApiRoutes.images + exercise.firstImageUrl!,
               height: 200,
               width: double.infinity,
               fit: BoxFit.contain,

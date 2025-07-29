@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:vexafit_frontend/data/irepositories/i_exercise_repository.dart';
 import 'package:vexafit_frontend/data/models/exercise/exercise_dto.dart';
 
+import '../../../core/utils/view_state.dart';
+
 // We can reuse this enum for different view states.
-enum ViewState { idle, loading, success, error }
 
 class ExerciseViewModel extends ChangeNotifier {
   final IExerciseRepository _exerciseRepository;
