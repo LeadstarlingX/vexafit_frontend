@@ -11,6 +11,7 @@ class ApiRoutes {
   static const String logout = '/api/Auth/Logout';
   static const String getAuthenticated = '/api/Auth/GetAuthenticated';
 
+
   // Category endpoints
   static const String categoryGetAll = '/api/Category/GetAll';
   static const String categoryGetById = '/api/Category/GetById';
