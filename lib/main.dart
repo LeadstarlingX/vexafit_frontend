@@ -15,7 +15,9 @@ import 'package:vexafit_frontend/presentation/viewmodels/theme/theme_view_model.
 import 'package:vexafit_frontend/presentation/viewmodels/workout/workout_details_view_model.dart';
 import 'package:vexafit_frontend/presentation/viewmodels/workout/workout_view_model.dart';
 
-void main() {
+
+void main()  {
+
   final dioClient = DioClient();
   final authRepository = AuthRepository(dioClient: dioClient);
   final workoutApiService = WorkoutApiService(dioClient: dioClient);
