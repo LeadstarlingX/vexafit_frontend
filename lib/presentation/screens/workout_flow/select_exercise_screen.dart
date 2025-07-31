@@ -22,7 +22,6 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch all exercises when the screen is first loaded.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ExerciseViewModel>().fetchAllExercises();
     });
@@ -87,7 +86,6 @@ class _SelectExerciseScreenState extends State<SelectExerciseScreen> {
 }
 
 
-/// A widget to display the categorized list for selection with images.
 class _CategorizedSelectList extends StatelessWidget {
   final Map<String, List<ExerciseDTO>> categorizedExercises;
   const _CategorizedSelectList({required this.categorizedExercises});
@@ -111,7 +109,6 @@ class _CategorizedSelectList extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             children: exercisesInCategory.map((exercise) {
-              // ✨ UPDATED: The ListTile now includes a leading image
               return ListTile(
                 leading: SizedBox(
                   width: 56,
@@ -140,7 +137,6 @@ class _CategorizedSelectList extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 onTap: () {
-                  // When an exercise is tapped, pop the screen and return the selected object.
                   context.pop(exercise);
                 },
               );

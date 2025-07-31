@@ -61,12 +61,10 @@ GoRouter createAppRouter(AuthViewModel authViewModel) {
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
 
-      // Allow access to splash screen while auth state is unknown
       if (authStatus == AuthStatus.unknown && isSplashScreen) {
         return null;
       }
 
-      // If user is logged in but on the login page, redirect to home
       if (isLoggedIn && isLoggingIn) {
         return '/home';
       }
@@ -76,7 +74,6 @@ GoRouter createAppRouter(AuthViewModel authViewModel) {
         return '/login';
       }
 
-      // In all other cases, allow navigation
       return null;
     },
     errorBuilder: (context, state) => Scaffold(

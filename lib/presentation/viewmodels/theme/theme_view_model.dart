@@ -6,21 +6,19 @@ class ThemeViewModel extends ChangeNotifier {
   late ThemeMode _themeMode;
 
   ThemeViewModel() {
-    _themeMode = ThemeMode.dark; // Default to dark
+    _themeMode = ThemeMode.light;
     _loadTheme();
   }
 
   ThemeMode get themeMode => _themeMode;
 
-  /// Loads the saved theme from shared preferences.
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    final isDarkMode = prefs.getBool(_themeKey) ?? true; // Default to dark if not set
+    final isDarkMode = prefs.getBool(_themeKey) ?? true;
     _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
     notifyListeners();
   }
 
-  /// Toggles the theme and saves the preference.
   Future<void> toggleTheme() async {
     _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     final prefs = await SharedPreferences.getInstance();

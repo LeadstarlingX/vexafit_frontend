@@ -86,7 +86,6 @@ class WorkoutRepository implements IWorkoutRepository {
     }
   }
 
-  // --- UPDATED METHODS ---
   @override
   Future<void> addExerciseToWorkout({
     required int workoutId,

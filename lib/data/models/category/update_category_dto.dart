@@ -1,6 +1,5 @@
 import './category_type_enum.dart';
 
-
 class UpdateCategoryDTO {
   final int id;
   final String name;

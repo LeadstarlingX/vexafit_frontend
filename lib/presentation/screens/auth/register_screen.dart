@@ -19,7 +19,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  // ✨ FIX: Hold a reference to the ViewModel
   late final AuthViewModel _authViewModel;
 
   bool _isLengthValid = false;
@@ -30,19 +29,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    // ✨ FIX: Get the ViewModel instance here
     _authViewModel = context.read<AuthViewModel>();
-    // Add listeners
     _authViewModel.addListener(_onAuthStatusChanged);
     _passwordController.addListener(_validatePasswordRules);
   }
 
   @override
   void dispose() {
-    // ✨ FIX: Use the stored reference, not context.read()
     _authViewModel.removeListener(_onAuthStatusChanged);
     _passwordController.removeListener(_validatePasswordRules);
-    // Dispose controllers
+
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -95,10 +91,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         role: RoleEnum.user,
       );
 
-      // 1. Call the updated register method
       final success = await _authViewModel.register(dto);
 
-      // 2. If it returns true, show a message and navigate
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -108,13 +102,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
         context.go('/login');
       }
-      // If it returns false, the error will be handled by your listener.
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // We can still use context.watch here to listen for rebuilds
     final authStatus = context.watch<AuthViewModel>().status;
 
     return Scaffold(

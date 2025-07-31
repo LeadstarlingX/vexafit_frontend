@@ -5,7 +5,7 @@ import 'package:vexafit_frontend/data/models/auth/login_dto.dart';
 import 'package:vexafit_frontend/presentation/widgets/primary_button.dart';
 import '../../viewmodels/auth/auth_view_model.dart';
 
-// ✨ CONVERT TO STATEFULWIDGET
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -14,13 +14,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // ✨ INITIALIZE CONTROLLERS HERE
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    // ✨ DISPOSE OF CONTROLLERS
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -28,7 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // This logic to watch the viewmodel and show errors remains the same.
     final authViewModel = context.watch<AuthViewModel>();
     final authStatus = authViewModel.status;
 
@@ -65,13 +62,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 48),
               TextField(
-                controller: _emailController, // ✨ Use the stateful controller
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: _passwordController, // ✨ Use the stateful controller
+                controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(labelText: 'Password'),
               ),

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:vexafit_frontend/core/dio/dio_client.dart';
 import 'package:vexafit_frontend/core/constants/api_routes.dart';
-
 import '../../data/models/workout/workout_enum.dart';
 
 class WorkoutApiService {
@@ -60,7 +59,6 @@ class WorkoutApiService {
     );
   }
 
-  // --- NEW AND UPDATED METHODS ---
   Future<Response> addExerciseToWorkout({
     required int workoutId,
     required int exerciseId,
@@ -78,7 +76,7 @@ class WorkoutApiService {
     if (weightKg != null) queryParameters['WeightKg'] = weightKg;
     if (durationSeconds != null) queryParameters['DurationSeconds'] = durationSeconds;
 
-    return await _dioClient.dio.post( // As per swagger
+    return await _dioClient.dio.post(
       ApiRoutes.workoutAddToWorkout,
       queryParameters: queryParameters,
     );
@@ -106,7 +104,7 @@ class WorkoutApiService {
   }
 
   Future<Response> removeExerciseFromWorkout(int workoutExerciseId) async {
-    return await _dioClient.dio.put( // As per swagger
+    return await _dioClient.dio.put(
       ApiRoutes.workoutDeleteFromWorkout,
       queryParameters: {'Id': workoutExerciseId},
     );

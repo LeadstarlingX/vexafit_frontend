@@ -5,14 +5,13 @@ import '../constants/api_routes.dart';
 import '../utils/token_storage.dart';
 
 class DioClient {
-  // Singleton instance
+
   static final DioClient _instance = DioClient._internal();
   late final Dio dio;
 
   factory DioClient() => _instance;
 
   DioClient._internal() {
-    // Initialize Dio with base options
     dio = Dio(
       BaseOptions(
         baseUrl: ApiRoutes.url,
@@ -26,7 +25,6 @@ class DioClient {
       ),
     );
 
-    // Add interceptors
     _addLoggingInterceptor();
     _addAuthInterceptor();
     _addErrorInterceptor();
@@ -64,18 +62,12 @@ class DioClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (DioException e, handler) async {
-          // Handle 401 Unauthorized
           if (e.response?.statusCode == 401) {
-            // Optionally: Refresh token logic here
             await TokenStorage.clearToken();
-            // You might want to navigate to login screen here
-            // navigatorKey.currentState?.pushNamed('/login');
           }
 
-          // Format error message
           final errorMessage = _formatErrorMessage(e);
 
-          // Create a custom error object
           final customError = DioException(
             requestOptions: e.requestOptions,
             error: errorMessage,
@@ -95,7 +87,6 @@ class DioClient {
     } else if (e.type == DioExceptionType.receiveTimeout) {
       return 'Server took too long to respond.';
     } else if (e.type == DioExceptionType.badResponse) {
-      // Try to get server error message
       final data = e.response?.data;
       if (data != null && data is Map<String, dynamic>) {
         return data['message'] ?? 'An error occurred';
@@ -105,7 +96,6 @@ class DioClient {
     return 'Network error occurred. Please try again.';
   }
 
-  // Helper method for common GET requests
   Future<Response> get(
       String path, {
         Map<String, dynamic>? queryParameters,
@@ -116,7 +106,6 @@ class DioClient {
     );
   }
 
-  // Helper method for common POST requests
   Future<Response> post(
       String path, {
         dynamic data,
@@ -129,7 +118,6 @@ class DioClient {
     );
   }
 
-  // Helper method for file uploads
   Future<Response> uploadFile(
       String path, {
         required String filePath,

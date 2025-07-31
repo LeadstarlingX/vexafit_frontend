@@ -35,7 +35,6 @@ class ProfileScreen extends StatelessWidget {
             ),
             const Spacer(flex: 1),
 
-            // --- THIS IS THE NEW WIDGET ---
             SwitchListTile(
               title: const Text('Dark Mode'),
               value: themeViewModel.themeMode == ThemeMode.dark,

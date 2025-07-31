@@ -18,7 +18,6 @@ class VideoDTO {
   }
 
   Map<String, dynamic> toJson() {
-    // camelCase for requests remains the same
     return {
       'id': id,
       'description': description,

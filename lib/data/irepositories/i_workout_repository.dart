@@ -1,5 +1,3 @@
-
-
 import '../models/workout/workout_dto.dart';
 import '../models/workout/workout_enum.dart';
 
@@ -19,7 +17,7 @@ abstract class IWorkoutRepository {
 
   Future<void> deleteWorkout(int workoutId);
 
-  // --- NEW AND UPDATED METHODS ---
+
   Future<void> addExerciseToWorkout({
     required int workoutId,
     required int exerciseId,
@@ -30,13 +28,12 @@ abstract class IWorkoutRepository {
   });
 
   Future<void> updateExerciseInWorkout({
-    required int workoutExerciseId, // This is the ID of the link, not the exercise
+    required int workoutExerciseId,
     required int sets,
     required int reps,
     int? weightKg,
     int? durationSeconds,
   });
 
-  // This now takes the ID of the WorkoutExercise link, as per your new swagger file.
   Future<void> removeExerciseFromWorkout(int workoutExerciseId);
 }

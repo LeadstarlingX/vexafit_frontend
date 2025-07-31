@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:vexafit_frontend/presentation/widgets/primary_button.dart';
 import '../../../data/models/exercise/exercise_dto.dart';
 
+
 class AddExerciseDetailsDialog extends StatefulWidget {
   final ExerciseDTO exercise;
 
@@ -39,7 +40,6 @@ class _AddExerciseDetailsDialogState extends State<AddExerciseDetailsDialog> {
 
   void _onSave() {
     if (_formKey.currentState!.validate()) {
-      // Return the details as a map
       final details = {
         'sets': int.parse(_setsController.text),
         'reps': int.parse(_repsController.text),

@@ -1,6 +1,5 @@
 import './category_dto.dart';
 
-
 class CategoryListApiResponse {
   final int code;
   final String? message;

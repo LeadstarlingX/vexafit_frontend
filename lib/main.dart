@@ -32,12 +32,8 @@ void main()  {
         ChangeNotifierProvider.value(value: authViewModel),
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),
 
-        // --- THIS IS THE FIX ---
         ChangeNotifierProxyProvider<AuthViewModel, WorkoutViewModel>(
-          // `create` provides the initial instance.
           create: (context) => WorkoutViewModel(workoutRepository, authViewModel),
-          // `update` is called whenever AuthViewModel changes.
-          // It provides the new auth state to our WorkoutViewModel and calls update().
           update: (context, auth, previousWorkoutViewModel) {
             previousWorkoutViewModel!..update();
             return previousWorkoutViewModel;

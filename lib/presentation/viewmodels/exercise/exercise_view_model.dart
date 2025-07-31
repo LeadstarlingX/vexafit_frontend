@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vexafit_frontend/data/irepositories/i_exercise_repository.dart';
 import 'package:vexafit_frontend/data/models/exercise/exercise_dto.dart';
-
 import '../../../core/utils/view_state.dart';
 
-// We can reuse this enum for different view states.
 
 class ExerciseViewModel extends ChangeNotifier {
   final IExerciseRepository _exerciseRepository;
@@ -24,15 +22,12 @@ class ExerciseViewModel extends ChangeNotifier {
 
   Map<String, List<ExerciseDTO>> get categorizedExercises => _categorizedExercises;
 
-  /// Groups the flat list of exercises into a categorized map.
   void _groupExercises() {
-    _categorizedExercises = {}; // Clear previous data
+    _categorizedExercises = {};
     for (var exercise in _exercises) {
       if (exercise.categories.isEmpty) {
-        // Add exercises with no category to a default group.
         (_categorizedExercises['Uncategorized'] ??= []).add(exercise);
       } else {
-        // An exercise can be in multiple categories.
         for (var category in exercise.categories) {
           if (category.name != null) {
             (_categorizedExercises[category.name!] ??= []).add(exercise);
@@ -42,7 +37,6 @@ class ExerciseViewModel extends ChangeNotifier {
     }
   }
 
-  /// Fetches all exercises from the repository.
   Future<void> fetchAllExercises({String? name}) async {
     _state = ViewState.loading;
     notifyListeners();

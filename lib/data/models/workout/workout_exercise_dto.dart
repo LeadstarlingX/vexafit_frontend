@@ -1,9 +1,6 @@
-
-
 import '../exercise/exercise_dto.dart';
 
 class WorkoutExerciseDTO {
-  // Added the 'Id' field for the link itself.
   final int id;
   final int workoutId;
   final int exerciseId;

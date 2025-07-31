@@ -7,7 +7,6 @@ class ExerciseApiService {
 
   ExerciseApiService({required DioClient dioClient}) : _dioClient = dioClient;
 
-  /// Fetches the raw list of exercises from the API.
   Future<Response> getExercises({String? name, String? description}) async {
     try {
       final Map<String, dynamic> queryParameters = {};

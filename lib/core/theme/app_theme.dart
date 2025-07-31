@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // --- Light Theme ---
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     scaffoldBackgroundColor: const Color(0xFFF5F5F5),
@@ -55,7 +54,7 @@ class AppTheme {
         borderSide: const BorderSide(color: Color(0xFF6200EE), width: 2),
       ),
     ),
-    // --- THIS IS THE FIX ---
+
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: const Color(0xFF6200EE), // Color for the selected icon and label
@@ -64,7 +63,7 @@ class AppTheme {
     ),
   );
 
-  // --- Dark Theme ---
+
   static final ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: const Color(0xFF121212),
@@ -115,7 +114,7 @@ class AppTheme {
         borderSide: const BorderSide(color: Color(0xFFBB86FC), width: 2),
       ),
     ),
-    // We can also be explicit with the dark theme for consistency.
+
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: const Color(0xFF1E1E1E),
       selectedItemColor: const Color(0xFFBB86FC),

@@ -15,9 +15,9 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity, // Make the button expand to full width
+      width: double.infinity,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed, // Disable button when loading
+        onPressed: isLoading ? null : onPressed,
         child: isLoading
             ? const SizedBox(
           height: 24,

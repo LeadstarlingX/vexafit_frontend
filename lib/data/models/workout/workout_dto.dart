@@ -1,5 +1,3 @@
-
-
 import 'package:vexafit_frontend/data/models/workout/workout_exercise_dto.dart';
 
 class WorkoutDTO {

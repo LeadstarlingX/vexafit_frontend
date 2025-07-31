@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/core/constants/api_routes.dart';
 import 'package:vexafit_frontend/data/models/exercise/exercise_dto.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
-
 import '../../../core/utils/view_state.dart';
 import '../../viewmodels/exercise/exercise_view_model.dart';
+
 
 class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({super.key});
@@ -21,7 +21,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch all exercises when the screen is first loaded.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ExerciseViewModel>().fetchAllExercises();
     });
@@ -33,7 +32,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     super.dispose();
   }
 
-  // Debounce search to avoid excessive API calls while typing.
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
@@ -110,7 +108,6 @@ class _CategorizedExerciseList extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             children: exercisesInCategory.map((exercise) {
-              // ✨ UPDATED: The ListTile now includes a leading image
               return ListTile(
                 leading: SizedBox(
                   width: 56,

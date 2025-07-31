@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// A simple button to avoid needing your PrimaryButton widget for this test.
 class SimpleButton extends StatelessWidget {
   final String text;
   const SimpleButton({super.key, required this.text});
@@ -14,13 +13,11 @@ class SimpleButton extends StatelessWidget {
   }
 }
 
-// This is the screen we will test.
 class TestScreen extends StatelessWidget {
   const TestScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // We are building the layout directly here.
     return Scaffold(
       body: SafeArea(
         child: Padding(

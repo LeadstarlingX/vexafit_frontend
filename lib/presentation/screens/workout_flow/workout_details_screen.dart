@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/core/constants/api_routes.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
-
 import '../../../core/utils/view_state.dart';
 import '../../../data/models/exercise/exercise_dto.dart';
 import '../../../data/models/workout/workout_dto.dart';

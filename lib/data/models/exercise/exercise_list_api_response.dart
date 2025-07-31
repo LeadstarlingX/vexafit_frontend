@@ -1,6 +1,5 @@
 import './exercise_dto.dart';
 
-
 class ExerciseListApiResponse {
   final int code;
   final String? message;

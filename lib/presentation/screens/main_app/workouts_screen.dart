@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vexafit_frontend/presentation/widgets/loading_indicator.dart';
-
 import '../../../core/utils/view_state.dart';
 import '../../../data/models/workout/workout_dto.dart';
 import '../../viewmodels/workout/workout_view_model.dart';
@@ -24,9 +23,6 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> with SingleTickerProvid
     _tabController.addListener(() {
       setState(() {});
     });
-    // --- THIS IS THE FIX ---
-    // We no longer need to call fetchWorkouts() here.
-    // The ViewModel does it automatically when the user logs in.
   }
 
   @override
