@@ -102,6 +102,30 @@ class WorkoutDetailsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  Future<void> updateWorkoutDetails({
+    required String name,
+    required String description,
+  }) async {
+    if (_workout == null) return;
+    _actionState = DetailsActionState.loading;
+    notifyListeners();
+
+    try {
+      // Assuming a method updateWorkout exists in the repository
+      await _workoutRepository.updateWorkout(
+        workoutId: _workout!.id,
+        name: name,
+        description: description,
+      );
+      _actionState = DetailsActionState.success;
+    } catch (e) {
+      _actionState = DetailsActionState.error;
+      _errorMessage = e.toString();
+    }
+    notifyListeners();
+  }
+
   Future<void> removeExerciseFromWorkout(int workoutExerciseId) async {
     if (_workout == null) return;
 
